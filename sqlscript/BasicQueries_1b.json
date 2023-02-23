@@ -1,0 +1,17 @@
+{
+	"name": "BasicQueries_1b",
+	"properties": {
+		"content": {
+			"query": "--Constrain by year\n--Scans 1683MB, returne 12769MB\nSELECT *, CAST(result.filepath(1) as INT) as puYear\nFROM\n    OPENROWSET(\n        BULK 'https://cgmsynapsewpbi.dfs.core.windows.net/default/output/nycyellow-ymd/puYear=*/puMonth=*/puDay=*/*.parquet',\n        FORMAT = 'PARQUET'\n    ) AS [result]\nWHERE result.filepath(1) = '2020'\n\n--Constrain by year and month\n--Scans 174MB, returns 1196MB\nSELECT  *, CAST(result.filepath(1) as INT) as puYear, CAST(result.filepath(2) as INT) as puMonth\nFROM\n    OPENROWSET(\n        BULK 'https://cgmsynapsewpbi.dfs.core.windows.net/default/output/nycyellow-ymd/puYear=*/puMonth=*/puDay=*/*.parquet',\n        FORMAT = 'PARQUET'\n    ) AS [result]\nWHERE   CAST(result.filepath(1) as INT) = 2020\n        AND CAST(result.filepath(2) as INT) = 1\n\n--Constrain by day\n--Still scans only 174MB only moves 38MB now.\n--Scan volume the same because even though it only returns one day it still needs to read the whole partition\nSELECT  *\n        , CAST(result.filepath(1) as INT) as puYear\n        , CAST(result.filepath(2) as INT) as puMonth\n        , CAST(result.filepath(3) as INT) as puDay\nFROM\n    OPENROWSET(\n        BULK 'https://cgmsynapsewpbi.dfs.core.windows.net/default/output/nycyellow-ymd/puYear=*/puMonth=*/puDay=*/*.parquet',\n        FORMAT = 'PARQUET'\n    ) AS [result]\nWHERE   CAST(result.filepath(1) as INT) = 2020\n        AND CAST(result.filepath(2) as INT) = 1\n        AND CAST(result.filepaht(3) as INT) = 1\n\n--What if we want to do multiple dates?\n--Scans 6MB returns 47MB\nSELECT  *\n        , CAST(result.filepath(1) as INT) as puYear\n        , CAST(result.filepath(2) as INT) as puMonth\n        , CAST(result.filepath(3) as INT) as puDay\nFROM\n    OPENROWSET(\n        BULK 'https://cgmsynapsewpbi.dfs.core.windows.net/default/output/nycyellow-ymd/puYear=*/puMonth=*/puDay=*/*.parquet',\n        FORMAT = 'PARQUET'\n    ) AS [result]\nWHERE   CAST(result.filepath(1) as INT) = 2021\n        AND CAST(result.filepath(2) as INT) = 1\n        AND CAST(result.filepath(3) as INT) IN(1,2)\n\n--This gets really ugly when you want to do range queries over a series of dates and stil get partition elimination\n--Scans 7MB moves 64MB\nSELECT  *\n        , CAST(result.filepath(1) as INT) as puYear\n        , CAST(result.filepath(2) as INT) as puMonth\n        , CAST(result.filepath(3) as INT) as puDay\nFROM\n    OPENROWSET(\n        BULK 'https://cgmsynapsewpbi.dfs.core.windows.net/default/output/nycyellow-ymd/puYear=*/puMonth=*/puDay=*/*.parquet',\n        FORMAT = 'PARQUET'\n    ) AS [result]\nWHERE   (\n            CAST(result.filepath(1) as INT) = 2021\n            AND CAST(result.filepath(2) as INT) = 1\n            AND CAST(result.filepath(3) as INT) IN(31)\n        )\n        OR (\n            CAST(result.filepath(1) as INT) = 2020\n            AND CAST(result.filepath(2) as INT) = 12\n            AND CAST(result.filepath(3) as INT) IN(1)\n        )",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
