@@ -2,12 +2,12 @@
 	"name": "02b - Queries with date partition on Delta",
 	"properties": {
 		"content": {
-			"query": "--This view is on top of the year / month / date structure.\nCREATE VIEW nycyellow_ymdate_delta AS\nSELECT\n    CAST(vendorId as INT) as vendorId,\n    CAST(tpepPickupDateTime as DATETIME) as tpepPickupDateTime,\n    CAST(tpepDropoffDateTime as DATETIME) as tpepDropoffDateTime,\n    passengerCount,\n    tripDistance,\n    puLocationId,\n    doLocationId,\n    startLon,\n    startLat,\n    endLon,\n    endLat,\n    rateCodeId,\n    storeAndFwdFlag,\n    paymentType,\n    fareAmount,\n    extra,\n    mtaTax,\n    improvementSurcharge,\n    tipAmount,\n    tollsAmount,\n    totalAmount,\n    puYear,\n    puMonth,\n    CAST(puDate as DATETIME) as puDate,\n    puYear * 100 + puMonth as puYearMonth\nFROM\n    OPENROWSET(\n        BULK 'https://cgmsynapsewpbi.dfs.core.windows.net/default/output/nycyellow-ymdate-delta/',\n        FORMAT = 'DELTA'\n    ) AS [result]\n\n\n--Constrain by date on nycyellow-ymdate from delta\n--This query is a lot easier to read, and now we're using dates which is more natural.\n--Most importantly this will work with normal query tools like Power BI\n--Scans 6MB moves 55MB\nSELECT  *\n        ,puYear\n        ,puMonth\n        ,puDate\nFROM    nycyellow_ymdate_delta\nWHERE   puDate BETWEEN '12/31/2020' AND '1/1/2021'\n",
+			"query": "--This view is on top of the year / month / date structure.\nCREATE VIEW nycyellow_ymdate_delta AS\nSELECT\n    CAST(vendorId as INT) as vendorId,\n    CAST(tpepPickupDateTime as DATETIME) as tpepPickupDateTime,\n    CAST(tpepDropoffDateTime as DATETIME) as tpepDropoffDateTime,\n    passengerCount,\n    tripDistance,\n    puLocationId,\n    doLocationId,\n    startLon,\n    startLat,\n    endLon,\n    endLat,\n    rateCodeId,\n    storeAndFwdFlag,\n    paymentType,\n    fareAmount,\n    extra,\n    mtaTax,\n    improvementSurcharge,\n    tipAmount,\n    tollsAmount,\n    totalAmount,\n    puYear,\n    puMonth,\n    CAST(puDate as DATETIME) as puDate,\n    puYear * 100 + puMonth as puYearMonth\nFROM\n    OPENROWSET(\n        BULK 'https://synapsefirstdata.dfs.core.windows.net/seconddata/output/nycyellow-ymdate-delta/',\n        FORMAT = 'DELTA'\n    ) AS [result]\n\n\n--Constrain by date on nycyellow-ymdate from delta\n--This query is a lot easier to read, and now we're using dates which is more natural.\n--Most importantly this will work with normal query tools like Power BI\n--Scans 6MB moves 55MB\nSELECT  *\n        ,puYear\n        ,puMonth\n        ,puDate\nFROM    nycyellow_ymdate_delta\nWHERE   puDate BETWEEN '1/1/2022' AND '2/1/2022'\n",
 			"metadata": {
 				"language": "sql"
 			},
 			"currentConnection": {
-				"databaseName": "master",
+				"databaseName": "TaxiData",
 				"poolName": "Built-in"
 			},
 			"resultLimit": 5000
