@@ -3,17 +3,21 @@
 	"properties": {
 		"nbformat": 4,
 		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "MySpark",
+			"type": "BigDataPoolReference"
+		},
 		"sessionProperties": {
-			"driverMemory": "28g",
-			"driverCores": 4,
-			"executorMemory": "28g",
-			"executorCores": 4,
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
 			"numExecutors": 2,
 			"conf": {
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "e0782f95-4d2f-4731-9ec1-08d3ae9f7d78"
+				"spark.autotune.trackingId": "7f5e2d4d-ad44-4edf-b644-c3dd1cd4e22a"
 			}
 		},
 		"metadata": {
@@ -25,6 +29,21 @@
 			},
 			"language_info": {
 				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/687f03ea-b265-4c5d-a6c6-926e951ee79a/resourceGroups/geir-forsmo-sandbox/providers/Microsoft.Synapse/workspaces/tdisynapseworkspace/bigDataPools/MySpark",
+				"name": "MySpark",
+				"type": "Spark",
+				"endpoint": "https://tdisynapseworkspace.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/MySpark",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.3",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"automaticScaleJobs": false
 			},
 			"sessionKeepAliveTimeout": 30
 		},
@@ -120,7 +139,7 @@
 					"\r\n",
 					"nyc_tlc_df.write.mode(\"overwrite\").partitionBy(\"puYear\",\"puMonth\").parquet(\"/output/nycyellow-ym\")"
 				],
-				"execution_count": null
+				"execution_count": 2
 			},
 			{
 				"cell_type": "markdown",
@@ -154,7 +173,7 @@
 					"nyc_df_ymd = nyc_tlc_df.withColumn('puDay', dayofmonth(col('tpepDropoffDateTime')))\r\n",
 					"nyc_df_ymd.write.mode(\"overwrite\").partitionBy(\"puYear\",\"puMonth\",\"puDay\").parquet(\"/output/nycyellow-ymd\")"
 				],
-				"execution_count": null
+				"execution_count": 3
 			},
 			{
 				"cell_type": "markdown",
@@ -186,7 +205,7 @@
 					"nyc_tlc_df = nyc_tlc_df.withColumn(\"puDate\",to_date(col('tpepDropoffDateTime')))\r\n",
 					"nyc_tlc_df.write.mode(\"overwrite\").partitionBy(\"puYear\",\"puMonth\",\"puDate\").parquet(\"/output/nycyellow-ymdate\")"
 				],
-				"execution_count": null
+				"execution_count": 4
 			},
 			{
 				"cell_type": "markdown",
@@ -217,7 +236,7 @@
 				"source": [
 					"nyc_tlc_df.write.mode(\"overwrite\").partitionBy(\"puYear\",\"puMonth\",\"puDate\").format(\"delta\").save(\"/output/nycyellow-ymdate-delta\")"
 				],
-				"execution_count": null
+				"execution_count": 5
 			}
 		]
 	}
