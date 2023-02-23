@@ -1,0 +1,17 @@
+{
+	"name": "01a - Basic queries",
+	"properties": {
+		"content": {
+			"query": "\nSELECT TOP 10 *\nFROM\n    OPENROWSET(\n        BULK 'https://cgmsynapsewpbi.dfs.core.windows.net/default/output/nycyellow-ym/puYear=*/puMonth=*/*.parquet',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n\n--SQL doesn't know about the year partition so this query fails\nSELECT  *\nFROM\n    OPENROWSET(\n        BULK 'https://cgmsynapsewpbi.dfs.core.windows.net/default/output/nycyellow-ym/puYear=*/puMonth=*/*.parquet',\n        FORMAT = 'PARQUET'\n    ) AS [result]\nWHERE puYear = 2020\n\n--Constrain by year\n--Scans 1683MB, returne 12769MB\nSELECT *, CAST(result.filepath(1) as INT) as puYear\nFROM\n    OPENROWSET(\n        BULK 'https://cgmsynapsewpbi.dfs.core.windows.net/default/output/nycyellow-ym/puYear=*/puMonth=*/*.parquet',\n        FORMAT = 'PARQUET'\n    ) AS [result]\nWHERE result.filepath(1) = '2020'\n\n--Constrain by year and month\n--Scans 174MB, returns 1196MB\nSELECT  *, CAST(result.filepath(1) as INT) as puYear, CAST(result.filepath(2) as INT) as puMonth\nFROM\n    OPENROWSET(\n        BULK 'https://cgmsynapsewpbi.dfs.core.windows.net/default/output/nycyellow-ym/puYear=*/puMonth=*/*.parquet',\n        FORMAT = 'PARQUET'\n    ) AS [result]\nWHERE   CAST(result.filepath(1) as INT) = 2020\n        AND CAST(result.filepath(2) as INT) = 1\n\n--Constrain by day\n--Still scans only 174MB only moves 38MB now.\n--Scan volume the same because even though it only returns one day it still needs to read the whole partition\nSELECT  *\n        , CAST(result.filepath(1) as INT) as puYear\n        , CAST(result.filepath(2) as INT) as puMonth\n        , DAY(tpepPickupDateTime) as puDay\nFROM\n    OPENROWSET(\n        BULK 'https://cgmsynapsewpbi.dfs.core.windows.net/default/output/nycyellow-ym/puYear=*/puMonth=*/*.parquet',\n        FORMAT = 'PARQUET'\n    ) AS [result]\nWHERE   CAST(result.filepath(1) as INT) = 2020\n        AND CAST(result.filepath(2) as INT) = 1\n        AND DAY(tpepPickupDateTime) = 1\n\n--Constrain by day on nycyellow-ymd\n--Now scans only 7MB and mvoes 40MB.\n--Because we've partitioned down to the day queries that include the day in the predicate can eliminate more folders\nSELECT  *\n        , CAST(result.filepath(1) as INT) as puYear\n        , CAST(result.filepath(2) as INT) as puMonth\n        , CAST(result.filepath(3) as INT) as puDay\nFROM\n    OPENROWSET(\n        BULK 'https://cgmsynapsewpbi.dfs.core.windows.net/default/output/nycyellow-ymd/puYear=*/puMonth=*/puDay=*/*.parquet',\n        FORMAT = 'PARQUET'\n    ) AS [result]\nWHERE   CAST(result.filepath(1) as INT) = 2020\n        AND CAST(result.filepath(2) as INT) = 1\n        AND CAST(result.filepath(3) as INT) = 1\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

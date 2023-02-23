@@ -1,0 +1,17 @@
+{
+	"name": "01c - Simplified basic queries",
+	"properties": {
+		"content": {
+			"query": "--This view is for access to year-month-day partitioioned data\nCREATE VIEW nycyellow_ymd AS\nSELECT\n    CAST(vendorId as INT) as vendorId,\n    CAST(tpepPickupDateTime as DATETIME) as tpepPickupDateTime,\n    CAST(tpepDropoffDateTime as DATETIME) as tpepDropoffDateTime,\n    passengerCount,\n    tripDistance,\n    puLocationId,\n    doLocationId,\n    startLon,\n    startLat,\n    endLon,\n    endLat,\n    rateCodeId,\n    storeAndFwdFlag,\n    paymentType,\n    fareAmount,\n    extra,\n    mtaTax,\n    improvementSurcharge,\n    tipAmount,\n    tollsAmount,\n    totalAmount,\n    CAST(result.filepath(1) as INT) as puYear,\n    CAST(result.filepath(2) as INT) as puMonth,\n    CAST(result.filepath(3) as INT) as puDay\nFROM\n    OPENROWSET(\n        BULK 'https://cgmsynapsewpbi.dfs.core.windows.net/default/output/nycyellow-ymd/puYear=*/puMonth=*/puDay=*/*.parquet',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n\n\n--Constrain by day on nycyellow-ymd\n--This query is a lot easier to read, and less complex to write, but doesn't yield any performance benefits.\n--Scans 7MB moves 64MB\nSELECT  *\n        ,puYear\n        ,puMonth\n        ,puDay\nFROM\n    OPENROWSET(\n        BULK 'https://cgmsynapsewpbi.dfs.core.windows.net/default/output/nycyellow-ymd/puYear=*/puMonth=*/puDay=*/*.parquet',\n        FORMAT = 'PARQUET'\n    ) AS [result]\nWHERE   (puYear = 2021 AND puMonth = 1 AND puDay = 31)\n        OR (puYear = 2020 AND puMonth = 12 AND puDay = 1)\n\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
